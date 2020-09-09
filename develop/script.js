@@ -5,19 +5,23 @@ const quiz = document.getElementById("game")
 const timer = document.getElementById("run-time");
 const scoreEl = document.getElementById("score");
 
-
+start.addEventListener("click", startQuiz);
+// global variables needed for the game.
 let currentQuestion = {};
 let correctAnswers = true;
 let score = 0;
 let questionCounter = 0;
 let availableQuestions = [];
+const scoreVal = 10;
+const maxQuestions = 5;
 const startingMin = 1;
 let time = startingMin * 60;
+const timePenalty = 10;
 let timerInterval;
 
-
+//questions for the quiz
 let questions = [{
-        question: "Inside which HTML elemt do we put the JavaScript?",
+        question: "Inside which HTML element do we put the JavaScript?",
         answer1: "<script>",
         answer2: "<Javascript>",
         answer3: "<js>",
@@ -26,12 +30,12 @@ let questions = [{
 
     },
     {
-        question: "What us the correct syntax for referring i=to an external script called 'xx.js'?",
-        answer1: "<script href= 'xxx.js'>",
-        answer2: "<script name= 'xxx.js'>",
-        answer3: "<script src='xxx.js'>",
-        answer4: "<script file='xxx.js'>",
-        answer: 3,
+        question: "Which of the following is an anonymous function?",
+        answer1: "function greetUser(name){ return 'welcome' + name;};",
+        answer2: "function greetUser(){ return 'welcome'};",
+        answer3: "function greetUser(){ return 'welcome'};",
+        answer4: "var greet = function(){ return 'welcome'};",
+        answer: 4,
 
     },
     {
@@ -42,12 +46,29 @@ let questions = [{
         answer4: "alert('Hello world')",
         answer: 4,
 
-    }
+    },
+    {
+        question: "Which of the following is not a data type in javaScript?",
+        answer1: "int",
+        answer2: "boolean",
+        answer3: "object",
+        answer4: "number",
+        answer: 3,
+
+    },
+    {
+        question: "Which of the following is the correct way to call a function?",
+        answer1: "setNum();",
+        answer2: "int setNum;",
+        answer3: "setNum",
+        answer4: "null",
+        answer: 1,
+
+    },
 ]
 
-const scoreVal = 10;
-const maxQuestions = 3;
 
+// game quiz function
 function startQuiz() {
     start.classList.add("hide");
     quiz.classList.remove("hide")
@@ -57,14 +78,11 @@ function startQuiz() {
     setTimer()
 }
 
+// this function will set questions
 function setNextQuestions() {
-    if (availableQuestions.length === 0 || questionCounter >= maxQuestions) {
-        start.classList.remove("hide");
-        quiz.classList.add("hide")
-        clearInterval(timerInterval);
-        timer.innerText = "time: "+ 0;
-        scoreEl.innerText = "Score: " + 0;
-
+    if (availableQuestions.length === 0 || questionCounter >= maxQuestions || time === 0) {
+        localStorage.setItem("mostRecentScore", score);
+        return window.location.assign("end.html");
     }
     questionCounter++;
     const randQuestion = Math.floor(Math.random() * availableQuestions.length);
@@ -79,6 +97,7 @@ function setNextQuestions() {
     correctAnswers = true;
 }
 
+// get info for when the user clicks on the answer options 
 answerChoices.forEach(answer => {
     answer.addEventListener("click", event => {
         if (!correctAnswers) {
@@ -93,12 +112,15 @@ answerChoices.forEach(answer => {
         } else {
             verifiyAnswer = "incorrect";
         }
-        // add scores to the anwers
-        if(verifiyAnswer === "correct"){
+
+        // add scores to the anwers when user selects a correct answer and deduct 10 seconds from the time when user selects a wrong answer
+        if (verifiyAnswer === "correct") {
             setScore(scoreVal);
+        } else {
+            time -= timePenalty;
         }
 
-
+        // add styles when the user selects correct and incorrect answers
         selectedChoice.parentElement.classList.add(verifiyAnswer);
         setTimeout(() => {
             selectedChoice.parentElement.classList.remove(verifiyAnswer);
@@ -109,17 +131,19 @@ answerChoices.forEach(answer => {
 
 // set game time
 function setTimer() {
-     timerInterval = setInterval(function () {
+    timerInterval = setInterval(function () {
         time--;
         timer.innerText = "time: " + time;
     }, 1000);
 
+    if (time === 0) {
+        localStorage.setItem("mostRecentScore", score);
+        return window.location.assign("end.html");
+    }
 }
 
 // set game score
-
 function setScore(num) {
     score += num;
     scoreEl.innerText = "Score:" + score;
 }
-start.addEventListener("click", startQuiz);
